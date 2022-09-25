@@ -1,7 +1,7 @@
 
 function errorHandler() {
-                        console.log('Ooops, that didnt work');
-                }
+    console.log('Ooops, that didnt work');
+}
 
 navigator.getUserMedia = (
     navigator.getUserMedia ||
@@ -16,17 +16,17 @@ function initialize() {
     height = video.height;
 
     canvas = document.getElementById("videoCanvas");
-//    console.log(videoCanvas);
+    //    console.log(videoCanvas);
     context = canvas.getContext('2d');
-     
-    video.addEventListener("playing", function() {
-       console.log("Started");
-       copyVideo = true;
+
+    video.addEventListener("playing", function () {
+        console.log("Started");
+        copyVideo = true;
     }, true);
 
     if (typeof navigator.mediaDevices.getUserMedia === 'undefined') {
-        navigator.getUserMedia({video: true}, streamHandler, errorHandler);
+        navigator.getUserMedia({ video: true }, streamHandler, errorHandler);
     } else {
-        navigator.mediaDevices.getUserMedia({video: true}).then(streamHandler).catch(errorHandler);
+        navigator.mediaDevices.getUserMedia({ video: true }).then(streamHandler).catch(errorHandler);
     }
 }
