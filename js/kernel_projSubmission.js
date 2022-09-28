@@ -1,12 +1,13 @@
 
 const canvasParent = document.getElementById('canvas-parent');
-const weirdFilter = document.getElementById('weird-filter');
+const filter = document.getElementById('filter');
 const gpuEnabled = document.getElementById('gpu-enabled');
 const fpsNumber = document.getElementById('fps-number');
 
 let lastCalledTime = Date.now();
 let fps;
 let delta;
+let filterValue = 0;
 let dispose = setup();
 gpuEnabled.onchange = () => {
   if (dispose) dispose();
@@ -24,29 +25,36 @@ function setup() {
     .addFunction(invertedColor1)
     .addFunction(mouseOver)
     .addFunction(calcDistance)
-    .addFunction(calcFactor);
+    .addFunction(calcFactor)
 
   // THIS IS THE IMPORTANT STUFF
   const kernel = gpu.createKernel(
-    function (frame, weirdFilter, mX, mY) {
+    function (frame, filter, filterValue, mX, mY) {
       const pixel = frame[this.thread.y][this.thread.x];
-      if (weirdFilter) {
+      // if (filter) {
 
-        var r = pixel[0];
-        var g = pixel[1];
-        var b = pixel[2];
-        var a = pixel[3];
+      var r = pixel[0];
+      var g = pixel[1];
+      var b = pixel[2];
+      var a = pixel[3];
 
-        const result = mouseOver(r, g, b, a, mX);
+      //   const result = mouseOver(r, g, b, a, mX);
+      //   this.color(result[0], result[1], result[2], result[3]);
+
+      //   // var dist = calcDistance(mX, mY, this.thread.x, this.thread.y);
+      //   // var factor = calcFactor(dist, 1024, 0, 1, 0);
+      //   // this.color(pixel.r * factor, pixel.g * factor, pixel.b * factor, pixel.a);
+
+      // } else {
+      //   this.color(pixel.r, pixel.g, pixel.b, pixel.a);
+      // }
+      if (filterValue == 1) {
+        const result = greenWorld(r, g, b, a);
         this.color(result[0], result[1], result[2], result[3]);
-
-        // var dist = calcDistance(mX, mY, this.thread.x, this.thread.y);
-        // var factor = calcFactor(dist, 1024, 0, 1, 0);
-        // this.color(pixel.r * factor, pixel.g * factor, pixel.b * factor, pixel.a);
-
       } else {
         this.color(pixel.r, pixel.g, pixel.b, pixel.a);
       }
+
     }, {
     // LEAVE these
     output: [1024, 768],
@@ -59,11 +67,12 @@ function setup() {
   canvasParent.appendChild(kernel.canvas);
   const videoElement = document.querySelector('video');
 
-  kernel(videoElement, weirdFilter.checked, 0, 0);
+  kernel(videoElement, filter.checked, filterValue, 0, 0);
   const canvas = kernel.canvas;
 
   var mouseX = 0;
   var mouseY = 0;
+
 
   canvas.addEventListener("mousemove", setMousePosition, false);
 
@@ -71,14 +80,14 @@ function setup() {
     mouseX = e.clientX;
     mouseY = e.clientY;
     console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
-    kernel(videoElement, weirdFilter.checked, mouseX, mouseY);
+    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
   }
 
   function render() {
     if (disposed) {
       return;
     }
-    kernel(videoElement, weirdFilter.checked, mouseX, mouseY);
+    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
     window.requestAnimationFrame(render);
     calcFPS();
   }
@@ -144,6 +153,11 @@ function calcFactor(xValue, maxValue, minValue, maxRange, minRange) {
   return (maxRange - minRange) * percentage + minRange;
 }
 
+function filterMode(value) {
+  filterValue = value;
+  console.log("filter mode: " + value);
+}
+
 // Green World Filter Code
 /*
         var r = pixel[0];
@@ -156,7 +170,7 @@ function calcFactor(xValue, maxValue, minValue, maxRange, minRange) {
 */
 
 
-// Inverted Color 
+// Inverted Color
 /*
         var r = pixel[0];
         var g = pixel[1];
