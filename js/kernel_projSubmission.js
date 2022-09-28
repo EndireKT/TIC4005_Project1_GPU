@@ -26,35 +26,44 @@ function setup() {
     .addFunction(mouseOver)
     .addFunction(calcDistance)
     .addFunction(calcFactor)
+    .addFunction(peekaboo);
 
   // THIS IS THE IMPORTANT STUFF
   const kernel = gpu.createKernel(
 
     function (frame, filter, filterValue, mX, mY) {
       const pixel = frame[this.thread.y][this.thread.x];
-      // if (filter) {
 
       var r = pixel[0];
       var g = pixel[1];
       var b = pixel[2];
       var a = pixel[3];
+      var result = [0, 0, 0, 0];
 
-      //   const result = mouseOver(r, g, b, a, mX);
-      //   this.color(result[0], result[1], result[2], result[3]);
-
-      //   // var dist = calcDistance(mX, mY, this.thread.x, this.thread.y);
-      //   // var factor = calcFactor(dist, 1024, 0, 1, 0);
-      //   // this.color(pixel.r * factor, pixel.g * factor, pixel.b * factor, pixel.a);
-
-      // } else {
-      //   this.color(pixel.r, pixel.g, pixel.b, pixel.a);
-      // }
       if (filterValue == 1) {
-        const result = greenWorld(r, g, b, a);
+        result = greenWorld(r, g, b, a);
         this.color(result[0], result[1], result[2], result[3]);
-      } else {
-        this.color(pixel.r, pixel.g, pixel.b, pixel.a);
+
+      } else if (filterValue == 2) {
+        result = invertedColor1(r, g, b, a);
+        this.color(result[0], result[1], result[2], result[3]);
+
+      } else if (filterValue == 3) {
+        result = mouseOver(r, g, b, a, mX);
+        this.color(result[0], result[1], result[2], result[3]);
+
+      } else if (filterValue == 4) {
+        result = peekaboo(r, g, b, a, mX, mY);
+        this.color(result[0], result[1], result[2], result[3]);
+
+      } else if (filterValue == 5) {
+        // to be done
+
       }
+      else {
+        result = [r, g, b, a];
+      }
+      this.color(result[0], result[1], result[2], result[3]);
 
     }, {
     // LEAVE these
@@ -142,6 +151,15 @@ function mouseOver(r, g, b, a, mX) {
   }
 }
 
+function peekaboo(r, g, b, a, mX, mY) {
+  var dist = calcDistance(mX, mY, this.thread.x, this.thread.y);
+  var factor = calcFactor(dist, 0, 500, 1, 0);
+  return [r * factor, g * factor, b * factor, a]
+}
+
+
+
+
 function calcDistance(x1, y1, x2, y2) {
   var a = x2 - x1;
   var b = y2 - y1;
@@ -167,36 +185,4 @@ function filterMode(value) {
   console.log("filter mode: " + value);
 }
 
-// Green World Filter Code
-/*
-        var r = pixel[0];
-        var g = pixel[1];
-        var b = pixel[2];
-        var a = pixel[3];
 
-        const result = greenWorld(r, g, b, a);
-        this.color(result[0], result[1], result[2], result[3]);
-*/
-
-
-// Inverted Color
-/*
-        var r = pixel[0];
-        var g = pixel[1];
-        var b = pixel[2];
-        var a = pixel[3];
-
-        const result = invertedColor1(r, g, b, a);
-        this.color(result[0], result[1], result[2], result[3]);
-*/
-
-// Mouse Over 
-/*
-        var r = pixel[0];
-        var g = pixel[1];
-        var b = pixel[2];
-        var a = pixel[3];
-
-        const result = mouseOver(r, g, b, a, mX);
-        this.color(result[0], result[1], result[2], result[3]);
-*/
