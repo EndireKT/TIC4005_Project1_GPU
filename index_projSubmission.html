@@ -12,8 +12,10 @@
   <h1>Streaming video processing with GPU.js</h1>
 
   <div style="text-align: center">
-    <label><input type="checkbox" id="weird-filter" /> Weird filter</label><br />
     <label><input type="checkbox" id="gpu-enabled" checked /> GPU enabled</label><br />
+    <label><input type="radio" name="filter" id="filter" value="1" />Default</label><br />
+    <label><input type="radio" name="filter" id="filter" value="2" />GreenWorld</label><br />
+    <label><input type="radio" name="filter" id="filter" value="3" />Inverted Color</label><br />
   </div>
 
   <video hidden id="video" width="1024" height="768"></video>
