@@ -29,6 +29,7 @@ function setup() {
 
   // THIS IS THE IMPORTANT STUFF
   const kernel = gpu.createKernel(
+
     function (frame, filter, filterValue, mX, mY) {
       const pixel = frame[this.thread.y][this.thread.x];
       // if (filter) {
@@ -63,30 +64,29 @@ function setup() {
   }
   );
 
-  // DO NOT TOUCH AFTER THIS (for now...)
   canvasParent.appendChild(kernel.canvas);
   const videoElement = document.querySelector('video');
-
   kernel(videoElement, filter.checked, filterValue, 0, 0);
   const canvas = kernel.canvas;
-
-  var mouseX = 0;
-  var mouseY = 0;
+  var mouseX = 1024 / 2;
+  var mouseY = 768 / 2;
 
 
   canvas.addEventListener("mousemove", setMousePosition, false);
 
   function setMousePosition(e) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    mouseX = e.clientX - canvas.offsetLeft;
+    mouseY = e.clientY - canvas.offsetTop;
     console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
     kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
+
   }
 
   function render() {
     if (disposed) {
       return;
     }
+
     kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
     window.requestAnimationFrame(render);
     calcFPS();
@@ -143,12 +143,21 @@ function mouseOver(r, g, b, a, mX) {
 }
 
 function calcDistance(x1, y1, x2, y2) {
-  var a = x1 - x2;
-  var b = y1 - y2;
+  var a = x2 - x1;
+  var b = y2 - y1;
   return Math.sqrt(a * a + b * b);
 }
 
 function calcFactor(xValue, maxValue, minValue, maxRange, minRange) {
+
+  // if (xValue < minValue) {
+  //   return minRange;
+  // }
+
+  // if (xValue > maxRange) {
+  //   return maxRange;
+  // }
+
   var percentage = (xValue - minValue) / (maxValue - minValue);
   return (maxRange - minRange) * percentage + minRange;
 }
