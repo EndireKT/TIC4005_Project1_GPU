@@ -5,16 +5,17 @@
   <link rel="icon" type="image/x-icon" href="../favicon.ico" />
   <meta charset="utf-8">
   <title>Streaming video processing with GPU.js</title>
+  <link rel="stylesheet" href="css/styling.css">
   <script src="js/gpu-browser.min.js"></script>
 </head>
 
 <body>
   <h1>Streaming video processing with GPU.js</h1>
 
-  <div style="text-align: center">
-    <label><input type="checkbox" id="gpu-enabled" checked /> GPU enabled</label><br />
+  <div>
+    <label><input type="checkbox" id="gpu-enabled" checked /> GPU enabled</label><br /><br />
     <div>
-      Choose One:
+      Choose One:<br />
       <label><input type="radio" name="filter" id="filter" value=0 onclick="filterMode(this.value)" />
         No Filter</label><br />
       <label><input type="radio" name="filter" id="filter2" value=1 onclick="filterMode(this.value)" /> Green
@@ -23,9 +24,19 @@
         Color</label><br />
       <label><input type="radio" name="filter" id="filter2" value=3 onclick="filterMode(this.value)" /> Mouse
         Over</label><br />
-      <label><input type="radio" name="filter" id="filter2" value=4 onclick="filterMode(this.value)" /> Inverted Peek A
+      <label><input type="radio" name="filter" id="filter2" value=4 onclick="filterMode(this.value)" /> Peek A
         Boo</label><br />
-      <label><input type="radio" name="filter" id="filter2" value=5 onclick="filterMode(this.value)" /> TO BE
+      <label><input type="radio" name="filter" id="filter2" value=5 onclick="filterMode5(this.value)" /> Basic Image
+        Processing</label><br />
+      <div id="show-sliders" style="display: none;">
+        <label><input type="range" min="1" max="100" value="50" class="slider" id="redSlider"
+            onchange="modifyRed(this.value)" /> Red</label><br />
+        <label><input type="range" min="1" max="100" value="50" class="slider" id="greenSlider"
+            onchange="modifyGreen(this.value)" /> Green</label><br />
+        <label><input type="range" min="1" max="100" value="50" class="slider" id="blueSlider"
+            onchange="modifyBlue(this.value)" /> Blue</label><br />
+      </div>
+      <label><input type="radio" name="filter" id="filter2" value=6 onclick="filterMode(this.value)" /> TO BE
         COMPPLETED</label><br />
     </div>
 

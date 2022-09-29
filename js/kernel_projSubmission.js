@@ -74,12 +74,16 @@ function setup() {
 
   canvasParent.appendChild(kernel.canvas);
   const videoElement = document.querySelector('video');
+
+  // initialize the kernel
   kernel(videoElement, filter.checked, filterValue, 0, 0);
+
+  // initialize the kernel and mouse position
   const canvas = kernel.canvas;
   var mouseX = 1024 / 2;
   var mouseY = 768 / 2;
 
-
+  // compute mouse position in the canvas when cursor move in the video screen
   canvas.addEventListener("mousemove", setMousePosition, false);
 
   function setMousePosition(e) {
@@ -92,6 +96,7 @@ function setup() {
     kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
   }
 
+  // render the video
   function render() {
     if (disposed) {
       return;
@@ -110,6 +115,7 @@ function setup() {
   };
 }
 
+// ignore this 
 function streamHandler(stream) {
   try {
     video.srcObject = stream;
@@ -121,8 +127,9 @@ function streamHandler(stream) {
   requestAnimationFrame(render);
 }
 
-
 addEventListener("DOMContentLoaded", initialize);
+
+// START OF ADDITION FUNCTIONS
 
 function calcFPS() {
   delta = (Date.now() - lastCalledTime) / 1000;
@@ -176,8 +183,14 @@ function calcFactor(dist, maxRange, minRange) {
 
 
 function filterMode(value) {
+  document.getElementById("show-sliders").style.display = "none";
   filterValue = value;
   console.log("filter mode: " + value);
 }
 
+function filterMode5(value) {
+  document.getElementById("show-sliders").style.display = "block";
+  filterValue = value;
+  console.log("filter mode: " + value);
+}
 
