@@ -57,7 +57,6 @@ function setup() {
         this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 5) {
-        // to be done
 
       }
       else {
@@ -84,11 +83,13 @@ function setup() {
   canvas.addEventListener("mousemove", setMousePosition, false);
 
   function setMousePosition(e) {
+    console.log("(Before) mouse Y: " + mouseY);
+    console.log("(Before) e.clientY: " + e.clientY);
+    console.log("(Before) canvas.offsetTop: " + canvas.offsetTop);
     mouseX = e.clientX - canvas.offsetLeft;
-    mouseY = e.clientY - canvas.offsetTop;
+    mouseY = 724 - (e.clientY - canvas.offsetTop);
     console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
     kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
-
   }
 
   function render() {
@@ -153,12 +154,9 @@ function mouseOver(r, g, b, a, mX) {
 
 function peekaboo(r, g, b, a, mX, mY) {
   var dist = calcDistance(mX, mY, this.thread.x, this.thread.y);
-  var factor = calcFactor(dist, 0, 500, 1, 0);
+  var factor = calcFactor(dist, 300, 0);
   return [r * factor, g * factor, b * factor, a]
 }
-
-
-
 
 function calcDistance(x1, y1, x2, y2) {
   var a = x2 - x1;
@@ -166,19 +164,16 @@ function calcDistance(x1, y1, x2, y2) {
   return Math.sqrt(a * a + b * b);
 }
 
-function calcFactor(xValue, maxValue, minValue, maxRange, minRange) {
-
-  // if (xValue < minValue) {
-  //   return minRange;
-  // }
-
-  // if (xValue > maxRange) {
-  //   return maxRange;
-  // }
-
-  var percentage = (xValue - minValue) / (maxValue - minValue);
-  return (maxRange - minRange) * percentage + minRange;
+function calcFactor(dist, maxRange, minRange) {
+  if (dist <= minRange) {
+    return 1;
+  }
+  if (dist >= maxRange) {
+    return 0;
+  }
+  return (maxRange - dist - minRange) / (maxRange - minRange);
 }
+
 
 function filterMode(value) {
   filterValue = value;
