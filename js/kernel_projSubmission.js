@@ -8,6 +8,7 @@ let lastCalledTime = Date.now();
 let fps;
 let delta;
 let filterValue = 0;
+
 let dispose = setup();
 gpuEnabled.onchange = () => {
   if (dispose) dispose();
@@ -38,30 +39,28 @@ function setup() {
       var g = pixel[1];
       var b = pixel[2];
       var a = pixel[3];
-      var result = [0, 0, 0, 0];
+      var result = [r, g, b, a];
 
       if (filterValue == 1) {
         result = greenWorld(r, g, b, a);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 2) {
         result = invertedColor1(r, g, b, a);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 3) {
         result = mouseOver(r, g, b, a, mX);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 4) {
         result = peekaboo(r, g, b, a, mX, mY);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 5) {
 
-      }
-      else {
+
+      } else {
         result = [r, g, b, a];
+
       }
+
       this.color(result[0], result[1], result[2], result[3]);
 
     }, {
@@ -101,7 +100,6 @@ function setup() {
     if (disposed) {
       return;
     }
-
     kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
     window.requestAnimationFrame(render);
     calcFPS();
@@ -129,8 +127,6 @@ function streamHandler(stream) {
 
 addEventListener("DOMContentLoaded", initialize);
 
-// START OF ADDITION FUNCTIONS
-
 function calcFPS() {
   delta = (Date.now() - lastCalledTime) / 1000;
   lastCalledTime = Date.now();
@@ -138,6 +134,12 @@ function calcFPS() {
   fpsNumber.innerHTML = fps.toFixed(0);
 }
 
+// START OF ADDITION FUNCTIONS
+
+
+
+
+// Function for manupulating pixel value
 
 function greenWorld(r, g, b, a) {
   return [0, g, 0, a];
@@ -165,13 +167,19 @@ function peekaboo(r, g, b, a, mX, mY) {
   return [r * factor, g * factor, b * factor, a]
 }
 
+
+
+// Function for calculation 
+
 function calcDistance(x1, y1, x2, y2) {
+  // return distance between two points using pythagoras theorem
   var a = x2 - x1;
   var b = y2 - y1;
   return Math.sqrt(a * a + b * b);
 }
 
 function calcFactor(dist, maxRange, minRange) {
+  // return normalized value between range as a factor between 1 to 0
   if (dist <= minRange) {
     return 1;
   }
@@ -181,6 +189,10 @@ function calcFactor(dist, maxRange, minRange) {
   return (maxRange - dist - minRange) / (maxRange - minRange);
 }
 
+
+
+
+// Function for Control Flow (checkbox, radio button, slider etc.)
 
 function filterMode(value) {
   document.getElementById("show-sliders").style.display = "none";
