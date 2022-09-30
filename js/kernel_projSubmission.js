@@ -8,6 +8,7 @@ let lastCalledTime = Date.now();
 let fps;
 let delta;
 let filterValue = 0;
+let k_value = [1, 2, 1, 2, 4, 2, 1, 2, 1];
 
 let dispose = setup();
 gpuEnabled.onchange = () => {
@@ -27,12 +28,13 @@ function setup() {
     .addFunction(mouseOver)
     .addFunction(calcDistance)
     .addFunction(calcFactor)
-    .addFunction(peekaboo);
+    .addFunction(peekaboo)
+    .addFunction(gaussianBlur);
 
   // THIS IS THE IMPORTANT STUFF
   const kernel = gpu.createKernel(
 
-    function (frame, filter, filterValue, mX, mY) {
+    function (frame, filter, filterValue, mX, mY, k_value) {
       const pixel = frame[this.thread.y][this.thread.x];
 
       var r = pixel[0];
@@ -40,6 +42,7 @@ function setup() {
       var b = pixel[2];
       var a = pixel[3];
       var result = [r, g, b, a];
+      var col = [0, 0, 0];
 
       if (filterValue == 1) {
         result = greenWorld(r, g, b, a);
@@ -54,7 +57,7 @@ function setup() {
         result = peekaboo(r, g, b, a, mX, mY);
 
       } else if (filterValue == 5) {
-
+        result = gaussianBlur(r, g, b, a, k_value);
 
       } else {
         result = [r, g, b, a];
@@ -75,7 +78,7 @@ function setup() {
   const videoElement = document.querySelector('video');
 
   // initialize the kernel
-  kernel(videoElement, filter.checked, filterValue, 0, 0);
+  kernel(videoElement, filter.checked, filterValue, 0, 0, k_value);
 
   // initialize the kernel and mouse position
   const canvas = kernel.canvas;
@@ -92,7 +95,7 @@ function setup() {
     mouseX = e.clientX - canvas.offsetLeft;
     mouseY = 724 - (e.clientY - canvas.offsetTop);
     console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
-    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
+    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
   }
 
   // render the video
@@ -100,7 +103,7 @@ function setup() {
     if (disposed) {
       return;
     }
-    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
+    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
     window.requestAnimationFrame(render);
     calcFPS();
   }
@@ -167,7 +170,10 @@ function peekaboo(r, g, b, a, mX, mY) {
   return [r * factor, g * factor, b * factor, a]
 }
 
+function gaussianBlur(r, g, b, a, k_value) {
 
+  return [r, g, b, a]
+}
 
 // Function for calculation 
 
