@@ -8,6 +8,10 @@ let lastCalledTime = Date.now();
 let fps;
 let delta;
 let filterValue = 0;
+let modifyRedValue = 0;
+let modifyBlueValue = 0;
+let modifyGreenValue = 0;
+
 let dispose = setup();
 gpuEnabled.onchange = () => {
   if (dispose) dispose();
@@ -26,44 +30,46 @@ function setup() {
     .addFunction(mouseOver)
     .addFunction(calcDistance)
     .addFunction(calcFactor)
-    .addFunction(peekaboo);
+    .addFunction(peekaboo)
+    .addFunction(basicImageProcessor)
+    .addFunction(containValue);
 
   // THIS IS THE IMPORTANT STUFF
   const kernel = gpu.createKernel(
 
-    function (frame, filter, filterValue, mX, mY) {
+    function (frame, filter, filterValue, mX, mY, mR, mG, mB) {
       const pixel = frame[this.thread.y][this.thread.x];
 
       var r = pixel[0];
       var g = pixel[1];
       var b = pixel[2];
       var a = pixel[3];
-      var result = [0, 0, 0, 0];
+      var result = [r, g, b, a];
 
       if (filterValue == 1) {
         result = greenWorld(r, g, b, a);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 2) {
         result = invertedColor1(r, g, b, a);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 3) {
         result = mouseOver(r, g, b, a, mX);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 4) {
         result = peekaboo(r, g, b, a, mX, mY);
-        this.color(result[0], result[1], result[2], result[3]);
 
       } else if (filterValue == 5) {
+        result = basicImageProcessor(r, g, b, a, mR, mG, mB);
 
-      }
-      else {
+      } else {
         result = [r, g, b, a];
-      }
-      this.color(result[0], result[1], result[2], result[3]);
 
+      }
+      pixel.r = 20;
+      pixel.g = 20;
+      pixel.b = 20;
+      // this.color(result[0], result[1], result[2], result[3]);
+      this.color(pixel.r, pixel.g, pixel.b, pixel.a);
     }, {
     // LEAVE these
     output: [1024, 768],
@@ -76,7 +82,7 @@ function setup() {
   const videoElement = document.querySelector('video');
 
   // initialize the kernel
-  kernel(videoElement, filter.checked, filterValue, 0, 0);
+  kernel(videoElement, filter.checked, filterValue, 0, 0, 0, 0, 0);
 
   // initialize the kernel and mouse position
   const canvas = kernel.canvas;
@@ -87,13 +93,16 @@ function setup() {
   canvas.addEventListener("mousemove", setMousePosition, false);
 
   function setMousePosition(e) {
-    console.log("(Before) mouse Y: " + mouseY);
-    console.log("(Before) e.clientY: " + e.clientY);
-    console.log("(Before) canvas.offsetTop: " + canvas.offsetTop);
+    // console.log("(Before) mouse Y: " + mouseY);
+    // console.log("(Before) e.clientY: " + e.clientY);
+    // console.log("(Before) canvas.offsetTop: " + canvas.offsetTop);
     mouseX = e.clientX - canvas.offsetLeft;
     mouseY = 724 - (e.clientY - canvas.offsetTop);
     console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
-    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
+    console.log("modifyRed: " + modifyRedValue);
+    console.log("modifyGreen: " + modifyGreenValue);
+    console.log("modifyBlue: " + modifyBlueValue);
+    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, modifyRedValue, modifyBlueValue, modifyGreenValue);
   }
 
   // render the video
@@ -101,8 +110,10 @@ function setup() {
     if (disposed) {
       return;
     }
-
-    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY);
+    console.log("modifyRed: " + modifyRedValue);
+    console.log("modifyGreen: " + modifyGreenValue);
+    console.log("modifyBlue: " + modifyBlueValue);
+    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, modifyRedValue, modifyBlueValue, modifyGreenValue);
     window.requestAnimationFrame(render);
     calcFPS();
   }
@@ -129,8 +140,6 @@ function streamHandler(stream) {
 
 addEventListener("DOMContentLoaded", initialize);
 
-// START OF ADDITION FUNCTIONS
-
 function calcFPS() {
   delta = (Date.now() - lastCalledTime) / 1000;
   lastCalledTime = Date.now();
@@ -138,6 +147,12 @@ function calcFPS() {
   fpsNumber.innerHTML = fps.toFixed(0);
 }
 
+// START OF ADDITION FUNCTIONS
+
+
+
+
+// Function for manupulating pixel value
 
 function greenWorld(r, g, b, a) {
   return [0, g, 0, a];
@@ -165,13 +180,29 @@ function peekaboo(r, g, b, a, mX, mY) {
   return [r * factor, g * factor, b * factor, a]
 }
 
+function basicImageProcessor(r, g, b, a, mR, mG, mB) {
+  // r = containValue(r + mR);
+  //r = r + mR;
+  // g = containValue(g + mG);
+  // b = containValue(b + mB);
+  return [240, 0, 0, a];
+}
+
+
+
+
+
+// Function for calculation 
+
 function calcDistance(x1, y1, x2, y2) {
+  // return distance between two points using pythagoras theorem
   var a = x2 - x1;
   var b = y2 - y1;
   return Math.sqrt(a * a + b * b);
 }
 
 function calcFactor(dist, maxRange, minRange) {
+  // return normalized value between range as a factor between 1 to 0
   if (dist <= minRange) {
     return 1;
   }
@@ -181,6 +212,28 @@ function calcFactor(dist, maxRange, minRange) {
   return (maxRange - dist - minRange) / (maxRange - minRange);
 }
 
+function containValue(value) {
+  // contain the value between 0 to 255
+  return Math.max(0, Math.min(Math.floor(value), 255));
+}
+
+
+// Function for slider values
+
+function modifyRed(value) {
+  modifyRedValue = value;
+}
+
+function modifyGreen(value) {
+  modifyBlueValue = value;
+}
+
+function modifyBlue(value) {
+  modifyBlueValue = value;
+}
+
+
+// Function for Control Flow (checkbox, radio button, slider etc.)
 
 function filterMode(value) {
   document.getElementById("show-sliders").style.display = "none";
