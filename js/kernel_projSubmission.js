@@ -8,7 +8,12 @@ let lastCalledTime = Date.now();
 let fps;
 let delta;
 let filterValue = 0;
-let k_value = [1, 2, 1, 2, 4, 2, 1, 2, 1];
+let k_value =
+  [1, 4, 6, 4, 1,
+    4, 16, 24, 16, 4,
+    6, 24, 36, 24, 6,
+    4, 16, 24, 16, 4,
+    1, 4, 6, 4, 1,];
 
 let dispose = setup();
 gpuEnabled.onchange = () => {
@@ -34,7 +39,7 @@ function setup() {
   // THIS IS THE IMPORTANT STUFF
   const kernel = gpu.createKernel(
 
-    function (frame, filter, filterValue, mX, mY, k_value) {
+    function (frame, filter, filterValue, mX, mY, k) {
       const pixel = frame[this.thread.y][this.thread.x];
 
       var r = pixel[0];
@@ -42,7 +47,6 @@ function setup() {
       var b = pixel[2];
       var a = pixel[3];
       var result = [r, g, b, a];
-      var col = [0, 0, 0];
 
       if (filterValue == 1) {
         result = greenWorld(r, g, b, a);
@@ -57,63 +61,118 @@ function setup() {
         result = peekaboo(r, g, b, a, mX, mY);
 
       } else if (filterValue == 5) {
-        result = gaussianBlur(r, g, b, a, k_value);
 
-      } else {
-        result = [r, g, b, a];
+        // somehow the function doesnt work outside, refactor it outside does not work
 
+        // const r1c1 = frame[this.thread.y + 2][this.thread.x - 2];
+        // const r1c2 = frame[this.thread.y + 2][this.thread.x - 1];
+        // const r1c3 = frame[this.thread.y + 2][this.thread.x + 0];
+        // const r1c4 = frame[this.thread.y + 2][this.thread.x + 1];
+        // const r1c5 = frame[this.thread.y + 2][this.thread.x + 2];
+
+        // const r2c1 = frame[this.thread.y + 1][this.thread.x - 2];
+        // const r2c2 = frame[this.thread.y + 1][this.thread.x - 1];
+        // const r2c3 = frame[this.thread.y + 1][this.thread.x + 0];
+        // const r2c4 = frame[this.thread.y + 1][this.thread.x + 1];
+        // const r2c5 = frame[this.thread.y + 1][this.thread.x + 2];
+
+        // const r3c1 = frame[this.thread.y][this.thread.x - 2];
+        // const r3c2 = frame[this.thread.y][this.thread.x - 1];
+        // const r3c3 = frame[this.thread.y][this.thread.x + 0];
+        // const r3c4 = frame[this.thread.y][this.thread.x + 1];
+        // const r3c5 = frame[this.thread.y][this.thread.x + 2];
+
+        // const r4c1 = frame[this.thread.y - 1][this.thread.x - 2];
+        // const r4c2 = frame[this.thread.y - 1][this.thread.x - 1];
+        // const r4c3 = frame[this.thread.y - 1][this.thread.x + 0];
+        // const r4c4 = frame[this.thread.y - 1][this.thread.x + 1];
+        // const r4c5 = frame[this.thread.y - 1][this.thread.x + 2];
+
+        // const r5c1 = frame[this.thread.y - 2][this.thread.x - 2];
+        // const r5c2 = frame[this.thread.y - 2][this.thread.x - 1];
+        // const r5c3 = frame[this.thread.y - 2][this.thread.x + 0];
+        // const r5c4 = frame[this.thread.y - 2][this.thread.x + 1];
+        // const r5c5 = frame[this.thread.y - 2][this.thread.x + 2];
+
+        // var divisor = 0;
+        // var col = [0, 0, 0];
+
+        // for (var j = 0; j < 15; j++) {
+        //   divisor += k[j];
+        // }
+
+        // for (var i = 0; i < 3; i++) {
+        //   col[i] = r1c1[i] * k[0] + r1c2[i] * k[1] + r1c3[i] * k[2]
+        //     + r2c1[i] * k[3] + r2c2[i] * k[4] + r2c3[i] * k[5]
+        //     + r3c1[i] * k[6] + r3c2[i] * k[7] + r3c3[i] * k[8];
+
+        //   col[i] =
+        //     r1c1[i] * k[0] + r1c2[i] * k[1] + r1c3[i] * k[2] + r1c4 * k[3] + r1c5 * k[4]
+        //     + r2c1[i] * k[0] + r2c2[i] * k[1] + r2c3[i] * k[2] + r2c4 * k[3] + r2c5 * k[4]
+        //     + r3c1[i] * k[0] + r3c2[i] * k[1] + r3c3[i] * k[2] + r3c4 * k[3] + r3c5 * k[4]
+        //     + r4c1[i] * k[0] + r4c2[i] * k[1] + r4c3[i] * k[2] + r4c4 * k[3] + r4c5 * k[4]
+        //     + r5c1[i] * k[0] + r5c2[i] * k[1] + r5c3[i] * k[2] + r5c4 * k[3] + r5c5 * k[4]
+
+        // col[i] = col[i] / divisor;
       }
+
+      result = [col[0], col[1], col[2], 1];
+
+    } else {
+    result =[r, g, b, a];
+
+  }
 
       this.color(result[0], result[1], result[2], result[3]);
 
-    }, {
-    // LEAVE these
-    output: [1024, 768],
+}, {
+  // LEAVE these
+  output: [1024, 768],
     graphical: true,
-    tactic: 'precision'
-  }
+      tactic: 'precision'
+}
   );
 
-  canvasParent.appendChild(kernel.canvas);
-  const videoElement = document.querySelector('video');
+canvasParent.appendChild(kernel.canvas);
+const videoElement = document.querySelector('video');
 
-  // initialize the kernel
-  kernel(videoElement, filter.checked, filterValue, 0, 0, k_value);
+// initialize the kernel
+kernel(videoElement, filter.checked, filterValue, 0, 0, k_value);
 
-  // initialize the kernel and mouse position
-  const canvas = kernel.canvas;
-  var mouseX = 1024 / 2;
-  var mouseY = 768 / 2;
+// initialize the kernel and mouse position
+const canvas = kernel.canvas;
+var mouseX = 1024 / 2;
+var mouseY = 768 / 2;
 
-  // compute mouse position in the canvas when cursor move in the video screen
-  canvas.addEventListener("mousemove", setMousePosition, false);
+// compute mouse position in the canvas when cursor move in the video screen
+canvas.addEventListener("mousemove", setMousePosition, false);
 
-  function setMousePosition(e) {
-    console.log("(Before) mouse Y: " + mouseY);
-    console.log("(Before) e.clientY: " + e.clientY);
-    console.log("(Before) canvas.offsetTop: " + canvas.offsetTop);
-    mouseX = e.clientX - canvas.offsetLeft;
-    mouseY = 724 - (e.clientY - canvas.offsetTop);
-    console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
-    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
+function setMousePosition(e) {
+  console.log("(Before) mouse Y: " + mouseY);
+  console.log("(Before) e.clientY: " + e.clientY);
+  console.log("(Before) canvas.offsetTop: " + canvas.offsetTop);
+  mouseX = e.clientX - canvas.offsetLeft;
+  mouseY = 724 - (e.clientY - canvas.offsetTop);
+  console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
+  kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
+}
+
+// render the video
+function render() {
+  if (disposed) {
+    return;
   }
+  kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
+  window.requestAnimationFrame(render);
+  calcFPS();
+}
 
-  // render the video
-  function render() {
-    if (disposed) {
-      return;
-    }
-    kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
-    window.requestAnimationFrame(render);
-    calcFPS();
-  }
-
-  render();
-  return () => {
-    canvasParent.removeChild(kernel.canvas);
-    gpu.destroy();
-    disposed = true;
-  };
+render();
+return () => {
+  canvasParent.removeChild(kernel.canvas);
+  gpu.destroy();
+  disposed = true;
+};
 }
 
 // ignore this 
@@ -170,9 +229,31 @@ function peekaboo(r, g, b, a, mX, mY) {
   return [r * factor, g * factor, b * factor, a]
 }
 
-function gaussianBlur(r, g, b, a, k_value) {
+function gaussianBlur(r, g, b, a, r1c1, r1c2, r1c3, r2c1, r2c2, r2c3, r3c1, r3c2, r3c3) {
 
-  return [r, g, b, a]
+  // for (var i = 0; i < 3; i++) {       // Compute the convolution for each of red [0], green [1] and blue [2]
+  //   r = a0[i] * k[0] + a1[i] * k[1] + a2[i] * k[2] + a3[i] * k[3] + a4[i] * k[4] + a5[i] * k[5] + a6[i] * k[6] + a7[i] * k[7] + a8[i] * k[8];
+  // }
+
+  //k = [1, 2, 1, 2, 4, 2, 1, 2, 1];
+  // var sometjiog = [0, 2, 3, 4];
+
+  // // // col = [0, 0, 0];
+  // // // divisor = 0;
+
+  // // // for (j = 0; j < k.length; j++) {
+  // // //   divisor += k[j];
+  // // // }
+
+  // // // for (i = 0; i < 3; i++) {
+  // // //   col[i] = r1c1[i] * k[0] + r1c2[i] * k[1] + r1c3[i] * k[2]
+  // // //     + r2c1[i] * k[3] + r2c2[i] * k[4] + r2c3[i] * k[5]
+  // // //   //     + r3c1[i] * k[6] + r3c2[i] * k[7] + r3c3[i] * k[8];
+  // // // }
+
+  // // let aaa = k[0];
+
+  // return [r, g, b, a]
 }
 
 // Function for calculation 
