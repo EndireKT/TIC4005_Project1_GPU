@@ -195,13 +195,13 @@ function calcFactor(dist, maxRange, minRange) {
 // Function for Control Flow (checkbox, radio button, slider etc.)
 
 function filterMode(value) {
-  document.getElementById("show-sliders").style.display = "none";
+  // document.getElementById("show-sliders").style.display = "none";
   filterValue = value;
   console.log("filter mode: " + value);
 }
 
 function filterMode5(value) {
-  document.getElementById("show-sliders").style.display = "block";
+  // document.getElementById("show-sliders").style.display = "block";
   filterValue = value;
   console.log("filter mode: " + value);
 }
