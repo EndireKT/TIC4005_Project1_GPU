@@ -124,7 +124,6 @@ function setup() {
   }
   );
 
-
   // kernel for Peek A Boo 
   const kernel4 = gpu.createKernel(
     function (frame, mX, mY) {
@@ -308,10 +307,17 @@ function calcFPS() {
 
 // Function for Control Flow (checkbox, radio button, slider etc.)
 function filterMode(value) {
-  // document.getElementById("show-sliders").style.display = "none";
+  document.getElementById("show-pipeline-checkboxes").style.display = "none";
   filterValue = value;
   console.log("filter mode: " + value);
 }
+
+// // Function for Control Flow (checkbox, radio button, slider etc.)
+// function filterModePipeLine(value) {
+//   document.getElementById("show-pipeline-checkboxes").style.display = "block";
+//   filterValue = value;
+//   console.log("filter mode: " + value);
+// }
 
 // calculate distance using pythagoras theorem
 function calcDistance(x1, y1, x2, y2) {
