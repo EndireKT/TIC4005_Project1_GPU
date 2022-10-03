@@ -159,7 +159,7 @@ function setup() {
     console.log("(Before) e.clientY: " + e.clientY);
     console.log("(Before) canvas.offsetTop: " + canvas.offsetTop);
     mouseX = e.clientX - canvas.offsetLeft;
-    mouseY = 724 - (e.clientY - canvas.offsetTop);
+    mouseY = 768 - (e.clientY - canvas.offsetTop);
     console.log("mouseX: " + mouseX + "  mouse Y: " + mouseY);
     kernel(videoElement, filter.checked, filterValue, mouseX, mouseY, k_value);
   }
@@ -215,6 +215,7 @@ function greenWorld(r, g, b, a) {
 }
 
 function invertedColor1(r, g, b, a) {
+  // return [1 - r, 1 - g, 1 - b, a];
   return [1 - r, 1 - g, 1 - b, a];
 }
 
